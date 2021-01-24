@@ -20,15 +20,15 @@ namespace PhonebookService.Controllers
         [Route("all")]
         public IActionResult GetAll()
         {
-            
+
             return Ok(Contacts);
         }
         [HttpGet]
         [Route("search")]
         public IActionResult Search(string name, string emailAddress)
         {
-            
-            
+
+
             return Ok(Contacts);
         }
 
@@ -48,11 +48,24 @@ namespace PhonebookService.Controllers
             return Ok("Success");
 
         }
-        
+
         [HttpPost]
-        [Route("update")]
-        public IActionResult Update(Contact contact)
+        [Route("update/{id}")]
+        public IActionResult Update(Guid id, ContactModel contact)
         {
+            var itemToUpdate = Contacts.FirstOrDefault(r => r.Id == id);
+            if (itemToUpdate == null)
+            {
+                return BadRequest("Invalid Id");
+            }
+            if (Contacts.Any(item => item.Id != id && string.Equals(item.EmailAddress, contact.EmailAddress, StringComparison.OrdinalIgnoreCase)))
+            {
+                return BadRequest("Email already associated with other user");
+            }
+
+            itemToUpdate.EmailAddress = contact.EmailAddress;
+            itemToUpdate.Name = contact.Name;
+            itemToUpdate.PhoneNumber = contact.PhoneNumber;
             return Ok("Success");
         }
 
@@ -60,12 +73,12 @@ namespace PhonebookService.Controllers
         [Route("delete/{id}")]
         public IActionResult Delete(Guid id)
         {
-            var itemToRemove = Contacts.SingleOrDefault(r => r.Id == id);
+            var itemToRemove = Contacts.FirstOrDefault(r => r.Id == id);
             if (itemToRemove != null)
                 Contacts.Remove(itemToRemove);
             return Ok("Deleted");
         }
 
-      
+
     }
 }
