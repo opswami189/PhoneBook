@@ -18,18 +18,29 @@ namespace PhonebookService.Controllers
         static List<Contact> Contacts = new List<Contact>();
         [HttpGet]
         [Route("all")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(int pageNumber,int pageSize=10)
         {
 
-            return Ok(Contacts);
+            return Ok(Contacts.Skip(pageSize*(pageNumber-1)).Take(pageSize));
         }
         [HttpGet]
         [Route("search")]
-        public IActionResult Search(string name, string emailAddress)
+        public IActionResult Search(string name, string emailAddress, int pageNumber, int pageSize=10)
         {
+            List<Contact> filteredContacts = Contacts;
+            
 
-
-            return Ok(Contacts);
+            if (!string.IsNullOrEmpty(name))
+            {
+                filteredContacts = Contacts.Where(r => string.Equals(r.Name,name,StringComparison.OrdinalIgnoreCase)).ToList();
+              
+            }
+             if (!string.IsNullOrEmpty(emailAddress))
+            {
+                filteredContacts = filteredContacts.Where(r => string.Equals(r.EmailAddress,emailAddress,StringComparison.OrdinalIgnoreCase)).ToList();
+              
+            }
+            return Ok(filteredContacts.Skip(pageSize * (pageNumber - 1)).Take(pageSize));
         }
 
         [HttpPost]
